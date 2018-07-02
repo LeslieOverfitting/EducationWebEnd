@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" type="text/css" href="css/icons-extra.css" />
+		<!--App自定义的css-->
+		<link rel="stylesheet" type="text/css" href="css/app.css"/>
+		<link rel="stylesheet" type="text/css" href="css/loaders.min.css"/>
+		<link rel="stylesheet" type="text/css" href="css/loading.css"/>
+		<script src="js/jquery.min.js" type="text/javascript"></script>
+		<script src="js/loading.animation.js" type="text/javascript"></script>
+		<style>
+			.title {
+				margin: 20px 15px 10px;
+				color: #6d6d72;
+				font-size: 15px;
+			}
+		</style>
+		
+	</head>
+	<!--loading页开始-->
+		<div class="loading">
+			<div class="loader">
+		        <div class="loader-inner pacman">
+		          <div></div>
+		          <div></div>
+		          <div></div>
+		          <div></div>
+		          <div></div>
+		        </div>
+			</div>
+		</div>
+		<!--loading页结束-->
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">精品课程</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<img src="images/java.jpg" data-preview-src="" data-preview-group="1" width="100%" height="25%"/>
+			</div>
+			<div class="title">
+				Java高级与大数据
+			</div>
+			<div class="mui-card">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell mui-media">
+						<img class="mui-media-object mui-pull-right" src="images/pretty.jpg">
+						<div class="mui-media-body">
+							学习方向
+							<p class='mui-ellipsis'>Java与大数据方向</p>
+						</div>						
+					</li>
+					<li class="mui-table-view-cell mui-media">
+						<img class="mui-media-object mui-pull-right" src="images/pretty.jpg">
+						<div class="mui-media-body">
+							开课分校
+							<p class='mui-ellipsis'>实训中心，恒大名都</p>
+						</div>
+					</li>
+					<li class="mui-table-view-cell mui-media">
+						<img class="mui-media-object mui-pull-right" src="images/pretty.jpg">
+						<div class="mui-media-body">
+							课程费用
+							<p class='mui-ellipsis'>200￥</p>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="mui-card" style="margin-top: 20px;">
+				<div class="mui-content-padded" style="background-color: #FFFFFF;">
+					<p>
+						大数据（big data），指无法在一定时间范围内用常规软件工具进行捕捉、管理和处理的数据集合，
+						是需要新处理模式才能具有更强的决策力、洞察发现力和流程优化能力的海量、高增长率和多样化的信息资产。
+					</p>
+				</div>
+			</div>
+			<div class="mui-content-padded" style="float: right;">
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="font-size: 15px;">
+					<span style=" padding-right: 2px;">标记为待付款</span>
+					<span class="mui-icon mui-icon-extra mui-icon-extra-cart"></span>
+				</button>
+				<button id="order" type="button" class="mui-btn mui-btn-warning" style="font-size: 15px;">
+					<span style="padding-right: 2px;">购买课程</span>
+					<span class="mui-icon mui-icon-extra mui-icon-extra-prech"></span>
+				</button>
+			</div>
+		</div>
+	</body>
+	<script src="js/mui.min.js"></script>
+	<script>
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		mui.plusReady(
+			document.getElementById("order").addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'order_lesson.html',
+					id: 'order_lesson.html' 
+            	});
+			})
+		)
+	</script>
+</html>

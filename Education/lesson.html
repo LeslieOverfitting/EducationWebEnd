@@ -99,8 +99,8 @@
 			<p style="margin-bottom: 0px;">
 				<img src="images/curriculum.png" height="10%" width="100%" />
 			</p>
-			<button id='showLessionPicker' class="mui-btn mui-btn-block" type='button'>地点-方向</button>
-			<div class="mui-row ">
+			<button id='showLessionPicker' class="mui-btn mui-btn-block" type='button'>地点-方向-类别</button>
+			<div id="pullrefresh" class="mui-row ">
 				<div id="segmentedControlContents" class="mui-col-xs-12" style="border-left: 1px solid #c8c7cc;">
 
 				</div>
@@ -113,58 +113,51 @@
 	<script type="text/javascript" src="js/mui.picker.js"></script>
 
 	<script>
-		mui.init({
-			swipeBack: true //启用右滑关闭功能
-
-		});
+		
 		//注册点击事件
 		document.getElementById("home").addEventListener("tap", function() {
 			mui.openWindow({
 				url: 'home.html',
 				id: 'home.html'
 			});
-		})
+		});
 		document.getElementById("moments").addEventListener("tap", function() {
 			mui.openWindow({
 				url: 'moments.html',
 				id: 'moments.html'
 			});
-		})
+		});
 		document.getElementById("my_own").addEventListener("tap", function() {
 			mui.openWindow({
 				url: 'my_own.html',
 				id: 'my_own.html'
 			});
-		})
-
-		/*
-		//分校课程选项卡切换
-		var controls = document.getElementById("segmentedControls");
-		var contents = document.getElementById("segmentedControlContents");
-		var html = [];
-		var i = 1, j = 1,
-			m = 5, //左侧选项卡数量+1
-			n = 6; //每个选项卡列表数量+1
-		for (; i < m; i++) {
-			html.push('<a class="mui-control-item" href="#content' + i + '">分校' + i + '</a>');
-		}
-		controls.innerHTML = html.join('');
-		html = [];
-		for (i = 1; i < m; i++) {
-			html.push('<div id="content' + i + '" class="mui-control-content"><ul class="mui-table-view"> <a href="lesson_info.html">');
-			for (j = 1; j < n; j++) {
-				html.push('<li class="mui-table-view-cell">'+
-				'<img src="images/'+'curriculum'+((j+i)%(n-1)+1)+'.png" data-preview-src="" data-preview-group="1" height="10%" width="100%"/>'
-				+'</a></li>');
-			}
-			html.push('</ul></div>');
-		}
-		contents.innerHTML = html.join('');
-		controls.querySelector('.mui-control-item').classList.add('mui-active');//默认选中第一个
-		contents.querySelector('.mui-control-content').classList.add('mui-active');
-	    */
+		});
+		
+		
+		
+		
+		
 	</script>
 	<script>
+		mui.init({
+			swipeBack: true ,//启用右滑关闭功能,
+			pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						callback: pulldownRefresh
+					},
+					up: {
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				}
+		});
+		var branchName="";
+		var freeOrNot="";
+		var category="";
+		var lessonRequestUrl="";
+		var boundaryId = -1;
 		(function($, doc) {
 			$.init();
 			$.ready(function() {
@@ -177,109 +170,190 @@
 				var _getParam = function(obj, param) {
 					return obj[param] || '';
 				};
-				var lessionData = [{
-					id: '0',
-					text: '全部',
+				/*
+				var lessionData =[{
+					"text": "实训中心",
 					children: [{
-						value: "110101",
-						text: "Java"
+						"text": "精品课",
+						children: [{
+							"text": "HTML5"
+						}, {
+							"text": "JAVA"
+						}]
 					}, {
-						value: "110102",
-						text: "大数据"
-					}, {
-						value: "110230",
-						text: "人工智能"
-					}, {
-						value: "110233",
-						text: "python"
-					}, {
-						value: "110234",
-						text: "前端"
+						"text": "试听课",
+						children: [{
+							"text": "java"
+						}, {
+							"text": "php"
+						}, {
+							"text": "python"
+						}, {
+							"text": "人工智能"
+						}]
 					}]
 				}, {
-					id: '1',
-					text: '实训中心',
+					text: "艺术中心",
 					children: [{
-						value: "110233",
-						text: "python"
+						text: "精品课",
+						children: [{
+							text: "C++"
+						}, {
+							text: "HTML5"
+						}]
 					}, {
-						value: "110234",
-						text: "前端"
-					}, {
-						value: "110230",
-						text: "人工智能"
+						text: "试听课",
+						children: [{
+							text: "c"
+						}, {
+							text: "知识图谱"
+						}]
 					}]
 				}, {
-					id: '2',
-					text: '艺术中心',
-					children: [{
-						value: "110101",
-						text: "Java"
+					text: "恒大名都",
+					"children": [{
+						text: "精品课",
+						children: [{
+							text: "HTML5"
+						}, {
+							text: "Python"
+						}]
 					}, {
-						value: "110102",
-						text: "大数据"
-					}, {
-						value: "110230",
-						text: "人工智能"
+						text: "试听课",
+						"children": []
 					}]
-				}, {
-					id: '3',
-					text: '恒大名都',
-					children: [{
-						value: "110234",
-						text: "前端"
-					}, {
-						value: "110102",
-						text: "大数据"
-					}, {
-						value: "110230",
-						text: "人工智能"
-					}]
-				}]
-
+				}];
+				
+			    */
+			   
 				//-----------------------------------------
 				//级联示例
 				var lessionPicker = new $.PopPicker({
-					layer: 2
+					layer: 3
 				});
-				lessionPicker.setData(lessionData);
-				var showCityPickerButton = doc.getElementById('showLessionPicker');
+				
+			 
+				mui.ajax("http://localhost:8083/education/selectAllCategoryByQid",{
+						type:"post",
+						async:true,
+						data:{qid:1},
+						dataType:"json",
+						withCredentials:true,
+						crossDomain: true,
+						success:function(data){
+							 lessionPicker.setData(data); 
+							 lessonRequestUrl= "http://localhost:8083/education/selectLessonByBranchNameCategoryAndPageAndQid";
+							 getLessonByBranchNameCategoryAndPage(lessonRequestUrl,1,data[0].text,"",-1);
+						},
+						error:function(xhr,type,errorThrown){
+	        							//异常处理；
+	        							console.log(type);
+	    				}
+				    });
+		 		var showCityPickerButton = doc.getElementById('showLessionPicker');
 				var lessionResult = doc.getElementById('segmentedControlContents');
-				var m = 5,
-					n = 6;
+				
+			   
+ 	 
 				showCityPickerButton.addEventListener('tap', function(event) {
 					lessionPicker.show(function(items) {
-						showCityPickerButton.innerText = items[0].text + "-" + items[1].text;
-						html = [];
-						html.push('<div id="content' + '" class="mui-control-content" style="display:block;" ><ul class="mui-table-view"> ');
-						for(j = 1; j < n; j++) {
-							html.push('<a href="lesson_info.html"> <li class="mui-table-view-cell">' +
-								'<img src="images/' + 'curriculum' + ((j+m) % (n - 1) + 1) + '.png" data-preview-src="" data-preview-group="1" height="10%" width="100%"/>' +
-								'</a></li>');
-						}
-						m=m+1;
-						html.push('</ul></div>');
-						//返回 false 可以阻止选择框的关闭
-						//return false;	
-						lessionResult.innerHTML = html.join('');
+						showCityPickerButton.innerText = items[0].text + "-" + items[1].text + "-" + items[2].text;
+						 branchName = items[0].text;
+						 freeOrNot = items[1].text;
+						 category = items[2].text;
+						 if("精品课"==items[1].text){
+						 	lessonRequestUrl = "http://localhost:8083/education/selectLessonByBranchNameCategoryAndPageAndQid";
+						 }else{
+						 	lessonRequestUrl = "http://localhost:8083/education/selectAllFreeListenByBranchNameAndCategoryAndQid";
+						 }
+						 boundaryId = -1;
+						 getLessonByBranchNameCategoryAndPage(lessonRequestUrl,1,items[0].text,items[2].text,boundaryId);
+ 						
 					});
 				}, false);
 				
-				html = [];
-				html.push('<div id="content' + '" class="mui-control-content" style="display:block;" ><ul class="mui-table-view"> ');
-				for(j = 1; j < 6; j++) {
-					html.push('<a href="lesson_info.html"> <li class="mui-table-view-cell">' +
-						'<img src="images/' + 'curriculum' + ((j) % (n - 1) + 1) + '.png" data-preview-src="" data-preview-group="1" height="10%" width="100%"/>' +
-						'</a></li>');
-				}
-				html.push('</ul></div>');
-				//返回 false 可以阻止选择框的关闭
-				//return false;	
-				lessionResult.innerHTML = html.join('');
+				 
 
 			});
 		})(mui, document);
 
+		
+		 function getLessonByBranchNameCategoryAndPage(requestUrl,qid,branchName,category,rowId){
+			    	mui.ajax(requestUrl,{
+							type:"post",
+							async:true,
+							data:{qid:qid,branchName:branchName,category:category,rowId:rowId},
+							dataType:"json",
+							withCredentials:true,
+							crossDomain: true,
+							success:function(data){
+								html = [];
+								html.push('<div id="content' + '" class="mui-control-content" style="display:block;" ><ul class="mui-table-view"> ');
+								for(var j = 0; j < data.length; j++) {
+									var lid = 0;
+									var fid = 0;
+									var idstr ="";
+									if(data[j].lid !=undefined)
+										idstr ="lesson_info.html?lid="+data[j].lid+'';
+									if(data[j].fid !=undefined)
+										idstr ="free_listen_info.html?fid="+data[j].fid+'';
+									html.push('<a href="'+idstr+' "> <li class="mui-table-view-cell">' +
+										'<img src="images/' + data[j].imgurl  + '" data-preview-src="" data-preview-group="1" height="10%" width="100%"/>' +
+										'</a></li>');
+								console.log(data[j].lid);
+								}
+								console.log(data.length);
+								if(data[data.length-1].lid !=undefined)
+									boundaryId = data[data.length-1].lid;
+								else
+									boundaryId = data[data.length-1].fid;
+								html.push('</ul></div>');
+								if(rowId ==-1)
+									jQuery('#segmentedControlContents').empty();
+								jQuery('#segmentedControlContents').append(html.join(''));
+								
+								
+							},
+							error:function(xhr,type,errorThrown){
+		        							//异常处理；
+		        							console.log(type);
+		    				}
+					    });
+			    }
+		
+		/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					var table = document.body.querySelector('.mui-table-view');
+					var cells = document.body.querySelectorAll('.mui-table-view-cell');
+					for (var i = cells.length, len = i + 3; i < len; i++) {
+						var li = document.createElement('li');
+						li.className = 'mui-table-view-cell';
+						li.innerHTML = '<a class="mui-navigate-right">Item ' + (i + 1) + '</a>';
+						//下拉刷新，新纪录插到最前面；
+						table.insertBefore(li, table.firstChild);
+					}
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
+				}, 1500);
+			}
+		
+			/**
+			 * 上拉加载具体业务实现
+			 */
+			function pullupRefresh() {
+				setTimeout(function() {
+					//mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > 2)); //参数为true代表没有更多数据了。
+					console.log('345');
+					console.log(lessonRequestUrl);
+					console.log("bound="+boundaryId);
+					getLessonByBranchNameCategoryAndPage(lessonRequestUrl,1,branchName,category,boundaryId);
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh(false);
+				}, 1500);
+			}
+			
+		
 		
 	</script>
 

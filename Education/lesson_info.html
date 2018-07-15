@@ -42,13 +42,13 @@
 	<body>
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<h1 class="mui-title">精品课程</h1>
+			<h1 id="lessonHeader" class="mui-title">精品课程</h1>
 		</header>
 		<div class="mui-content">
 			<div class="mui-content-padded">
-				<img src="images/java.jpg" data-preview-src="" data-preview-group="1" width="100%" height="25%"/>
+				<img id="lessonImg" src="images/java.jpg" data-preview-src="" data-preview-group="1" width="100%" height="25%"/>
 			</div>
-			<div class="title">
+			<div id="lessonTitle" class="title">
 				Java高级与大数据
 			</div>
 			<div class="mui-card">
@@ -57,35 +57,34 @@
 						<img class="mui-media-object mui-pull-right" src="images/pretty.jpg">
 						<div class="mui-media-body">
 							学习方向
-							<p class='mui-ellipsis'>Java与大数据方向</p>
+							<p id="studyDirection" class='mui-ellipsis'>Java与大数据方向</p>
 						</div>						
 					</li>
 					<li class="mui-table-view-cell mui-media">
 						<img class="mui-media-object mui-pull-right" src="images/pretty.jpg">
 						<div class="mui-media-body">
 							开课分校
-							<p class='mui-ellipsis'>实训中心，恒大名都</p>
+							<p id="schoolLoaction" class='mui-ellipsis'>实训中心，恒大名都</p>
 						</div>
 					</li>
 					<li class="mui-table-view-cell mui-media">
 						<img class="mui-media-object mui-pull-right" src="images/pretty.jpg">
 						<div class="mui-media-body">
 							课程费用
-							<p class='mui-ellipsis'>200￥</p>
+							<p id="lessonPrice" class='mui-ellipsis'>200￥</p>
 						</div>
 					</li>
 				</ul>
 			</div>
 			<div class="mui-card" style="margin-top: 20px;">
 				<div class="mui-content-padded" style="background-color: #FFFFFF;">
-					<p>
-						大数据（big data），指无法在一定时间范围内用常规软件工具进行捕捉、管理和处理的数据集合，
-						是需要新处理模式才能具有更强的决策力、洞察发现力和流程优化能力的海量、高增长率和多样化的信息资产。
+					<p id="lessonDesc">
+					
 					</p>
 				</div>
 			</div>
 			<div class="mui-content-padded" style="float: right;">
-				<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="font-size: 15px;">
+				<button id="bookOrder" type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="font-size: 15px;">
 					<span style=" padding-right: 2px;">标记为待付款</span>
 					<span class="mui-icon mui-icon-extra mui-icon-extra-cart"></span>
 				</button>
@@ -101,13 +100,70 @@
 		mui.init({
 			swipeBack:true //启用右滑关闭功能
 		});
-		mui.plusReady(
-			document.getElementById("order").addEventListener('tap', function() {
-				mui.openWindow({
-					url: 'order_lesson.html',
-					id: 'order_lesson.html' 
-            	});
-			})
-		)
+		function skipHtml(url){
+			 mui.openWindow({
+				url: url
+			});
+		};
+		var parameters = ((window.location+'').split('?')[1]).split('=');
+		var requestUrl ="http://localhost:8083/education/selectLessonByLid";
+		var lessonId = parameters[1];
+		
+		lessonId = parameters[1];
+		console.log(lessonId);
+		$("#lessonHeader").text('精品课程')
+	   getLessonInfo(requestUrl,1,lessonId);
+		function getLessonInfo(url,qid,lessonId){
+				//获取所有订单
+				mui.ajax(url,{
+					type:"post",
+					async:true,
+					data:{qid:1,lessonId:lessonId},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						$("#lessonImg").attr('src','images/'+data.imgurl) ;
+						$("#studyDirection").text(data.category)
+					    $("#lessonTitle").html(data.title);
+					    $("#schoolLoaction").text(data.branch + data.address);
+					    $("#lessonPrice").text(data.price+'￥');
+					    $("#lessonDesc").text(data.lessonDesc);
+					    
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    				}
+
+				});
+				
+		};
+		document.getElementById("bookOrder").addEventListener('tap', function() {
+				 mui.ajax("http://localhost:8083/education/bookSorder",{
+					type:"post",
+					async:true,
+					data:{qid:1,lid:lessonId},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){	 
+					    skipHtml("my_orders.html?lid="+lessonId+"");
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    				}
+
+				});
+		})	
+		
+		
+		
+		document.getElementById("order").addEventListener('tap', function() {
+				skipHtml("order_lesson.html?lid="+lessonId+'&oid=0');
+		})	
+		
+		
 	</script>
 </html>

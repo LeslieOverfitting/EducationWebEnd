@@ -206,44 +206,55 @@
 			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
 			<h1 class="mui-title">动态发现</h1>
 		</header>
-		<nav class="mui-bar mui-bar-tab">
-			<a class="mui-tab-item" id="home">
-				<span class="mui-icon mui-icon-home" style="font-size: 25px;"></span>
-				<span class="mui-tab-label">首页</span>
-			</a>
-
-			<a class="mui-tab-item" id="lesson">
-				<span class="mui-icon mui-icon-extra mui-icon-extra-class" style="font-size: 25px;"></span>
-				<span class="mui-tab-label">课程</span>
-			</a>
-			<a class="mui-tab-item mui-active">
-				<span class="mui-icon mui-icon-search" style="font-size: 25px;"></span>
-				<span class="mui-tab-label">发现</span>
-			</a>
-			<a class="mui-tab-item" id="my_own">
-				<span class="mui-icon mui-icon-contact" style="font-size: 25px;"></span>
-				<span class="mui-tab-label">我的</span>
-			</a>
-		</nav>
+	 
 		<div id="content" class="mui-content">			
-			<p>
+			<p id="backImg">
 				<img src="images/moment_background.jpg" height="230px" width="100%"/>
 			</p>	
 			
 		</div>
+		<div id="comment" class="mui-popover mui-popover-action mui-popover-bottom">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<span class="mui-input-row">
+						<input id="commentValue" type="text" style="width: 77%; margin-bottom: 0px; color: #555555;" placeholder="评论一下">
+						<button   id="publish"  onclick="window.location.href='#comment'" type="button" class="mui-btn mui-btn-green"
+							style="width: 20%; font-size: 15px;">
+							发表
+						</button>
+					</span>
+				</li>
+			</ul>			
+		</div>
 	</body>
 	<script src="js/mui.min.js"></script>
 	<script src="js/mui.zoom.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+	<script src="js/mui.pullToRefresh.js"></script>
 	<script src="js/mui.previewimage.js"></script>
 	<script>
 		mui.previewImage();
 	</script>
 	<script>
-		
+		var boundaryId = -1;
+		var maxId =0;
+		var mid = 0;
+		var nickName = "";
+		var uid = "";
 		mui.init({
-			swipeBack: true //启用右滑关闭功能
+			swipeBack: true ,//启用右滑关闭功能,
+			pullRefresh: {
+					container: '#content',
+					down: {
+						callback: pulldownRefresh
+					},
+					up: {
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				}
 		});
-		
+ 	/*
 		//注册点击事件
 		document.getElementById("home").addEventListener("tap", function() {
 			mui.openWindow({
@@ -263,51 +274,274 @@
 				id: 'my_own.html' 
 	    	});
 		})
-		
-	
-				
+		*/
 		var contents = document.getElementById("content");
-		html =[];
+		var prePend = document.getElementById("backImg");
+		getMessageByQid(1,-1);
+		getNickName();
 		
-		for(var i=1;i<=9;i++){
-			html.push('<div class="mui-card">');
-			html.push('<div class="mui-card-header">');
-			html.push('我爱学习，学习爱我');
-			html.push('</div><div class="mui-card-content">');
-			html.push('<div class="mui-card-content-inner">');				 
-			for(var j=1;j<=i;j++){
-				html.push('<span class="messagelist-imgs'+i+'" style="background-image: url('+'images/moment'+(j%2+1)+'.jpg);">');
-				html.push('<img src="images/moment'+(j%2+1)+'.jpg " data-preview-src="" data-preview-group="1"  style="opacity: 0;width: 100%;height: 100%;"/></span>');
-			}
-			html.push('<p>');
-			html.push('近日，有调查显示，越来越多的网友在微信朋友圈设置“三天可见”，缩小朋友圈记录的查看范围。该功能被广泛使用后，网友开始分站两边。');
-			html.push('</p>');
-			html.push('<p align="right">');			
-			html.push('2018-6-23 13:40:12');
-			html.push('</p>');
-			html.push('</div></div>');
-			html.push('<div class="mui-card-footer">');
-			html.push('<a class="mui-card-link"><span class="mui-icon mui-icon-extra mui-icon-extra-heart-filled"></span></a>');	
-			html.push('<a class="mui-card-link"><span class="mui-icon mui-icon-compose"></span></a></div>');
-			html.push('<div class="mui-card-footer">');
-			html.push('颜日升：哈哈哈<br>');
-			html.push('丘山日生点三口：哈哈哈<br>');
-			html.push('</div></div>');
+		function getNickName(){
+				mui.ajax("http://localhost:8083/education/selectUserByUid",{
+					type:"post",
+					async:true,
+					data:{},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						 nickName = data.nickname;
+						 uid = data.uid;
+						 console.log(nickName);
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    			}
+				});
+		}
+		
+		
+		function getMessageByQidDownFresh(qid){
 
-			}
-		contents.innerHTML += html.join('');
+				mui.ajax("http://localhost:8083/education/selectAllMessageByQidDownFresh",{
+					type:"post",
+					async:true,
+					data:{qid:qid,maxId:maxId},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						for(var i=data.length-1;i>=0;i--){
+							jQuery(prePend).after(showComment(data[i]));		
+						}
+						if(data.length>0){
+								maxId = data[0].mid;
+						}
+						
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    			}
+				});
+		}
+	
+		function getMessageByQid(qid,rowId){
+				mui.ajax("http://localhost:8083/education/selectAllMessageByPageAndQid",{
+					type:"post",
+					async:true,
+					data:{qid:qid,rowId:rowId},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						for(var i=0;i<data.length;i++){
+						//	console.log(data.length);
+							jQuery(contents).append(showComment(data[i]));		
+						}
+						
+						if(data.length!=0)
+							boundaryId = data[data.length-1].mid;
+						else
+							boundaryId = -2;
+						if(rowId==-1)
+							maxId = data[0].mid;
+						
+						setDisplayNone();
+					},
+					done:function(){
+						setDisplayNone();
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    			}
+				});
+		}
 		
+		function showComment(data){
+				 
+				html =[];
+				html.push('<div class="mui-card" id="card'+ data.mid +'">');
+				html.push('<div class="mui-card-header">');
+				html.push(data.mtitle);
+				html.push('</div><div class="mui-card-content">');
+				html.push('<div class="mui-card-content-inner">');				 
+				for(var j=0;j<data.imgs.length;j++){
+					html.push('<span class="messagelist-imgs'+data.imgs.length+'" style="background-image: url('+'images/'+ data.imgs[j].imgurl+ ');">');
+					html.push('<img src="images/'+data.imgs[j].imgurl+'" data-preview-src="" data-preview-group="1"  style="opacity: 0;width: 100%;height: 100%;"/></span>');
+				}
+				html.push('<p align="right">');			
+				html.push(data.mtime);
+				html.push('</p>');
+				html.push('</div></div>');
+				html.push('<div class="mui-card-footer">');
+				var redOrNot ='';
+				for(var j=0;j<data.likes.length;j++){
+					if(data.likes[j].user.uid ==uid)
+					{
+						redOrNot= 'red';
+					}
+					 
+				}
+				html.push('<a  class="mui-card-link"><span style="color:'+redOrNot +'" class="mui-icon mui-icon-extra mui-icon-extra-heart-filled"  value="'+data.mid +'">');
+				html.push('<span id="likersName'+data.mid +'">');
+				for(var j=0;j<data.likes.length;j++){
+					 
+					if(j+1<data.likes.length)
+						html.push(data.likes[j].user.nickname+' ');
+					else
+						html.push(data.likes[j].user.nickname);
+				}
+				html.push('</span>');
+				html.push('</span></a>');
+				html.push('<a  href="#comment"  class="mui-card-link"><span class="mui-icon mui-icon-compose" value="'+data.mid +'" ></span></a></div>');
+				
+				if(data.replies.length>0){
+					html.push('<div id="reply'+data.mid+'" class="mui-card-footer">');
+					for(var j=0;j<data.replies.length;j++){
+						html.push(data.replies[j].user.nickname +':'+data.replies[j].content+'<br>');
+					}
+					html.push('</div>');
+				}
+				html.push('</div>');
+			 	return html.join('');
+			}
+ 
+			
+		function saveLike(mid){
+				mui.ajax("http://localhost:8083/education/addLike",{
+					type:"post",
+					async:true,
+					data:{mid:mid},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						console.log(data.nickname);
+						//console.log($('#likersName'+mid+'').innerText);
+						
+						 document.getElementById('likersName'+mid+'').innerText += ' '+data.nickname;
+						 
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    			}
+				});
+			
+		};
+		 
+		function deleteLike(mid){
+				mui.ajax("http://localhost:8083/education/deleteLike",{
+					type:"post",
+					async:true,
+					data:{mid:mid},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						 var likerNames = document.getElementById('likersName'+mid+'').innerText;
+						  var temp = likerNames.split(nickName).join('');
+						 document.getElementById('likersName'+mid+'').innerText = temp;
+						
+						 
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    			}
+				});
+			
+		}; 
+		
+		function saveComment(mid,comment){
+				mui.ajax("http://localhost:8083/education/addMessageReply",{
+					type:"post",
+					async:true,
+					data:{mid:mid,comment:comment},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+		
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    			}
+				});
+			
+		}; 
+		
+		
+		 
+		 
+		 
 	    mui(".mui-content").on('tap','.mui-icon-extra-heart-filled',function(item){
+	    	console.log($(this).attr('value'));
+	    	mid = $(this).attr('value');
 	    	if((''+this.style.color) =="red")
+	    	{
 	    		this.style.color="";
-	    	else
+	    		deleteLike(mid);
+	    	}
+	    	else{
 	    		this.style.color="red";
+	    		saveLike(mid);
+	    	}
+	   
+	    });
+	    
+	    mui("#comment").on('tap','#publish',function(item){
+	    	var innerComment = $('#commentValue').val();
+	    	console.log(innerComment);
+	    	saveComment(mid,innerComment);
+	    	document.getElementById('reply'+mid+'').innerHTML += nickName+':'+innerComment;
+	    	document.getElementById("comment").style.display = 'none';
 	    	
+	    	
+	    });
+	    
+	    
+		mui(".mui-content").on('tap','.mui-icon-compose',function(item){
+	    	mid = $(this).attr('value');
 	    });
 		
 		
+		/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					getMessageByQidDownFresh(1);
+					mui('#content').pullRefresh().endPulldownToRefresh(); //refresh completed
+					setDisplayNone();
+				}, 1500);
+			}
 		
-		
+			/**
+			 * 上拉加载具体业务实现
+			 */
+			function pullupRefresh() {
+				setTimeout(function() {
+					//mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > 2)); //参数为true代表没有更多数据了。
+					console.log("bound="+boundaryId);
+					getMessageByQid(1,boundaryId);
+					mui('#content').pullRefresh().endPullupToRefresh(boundaryId==-2);
+					setDisplayNone();
+				}, 1500);
+			}
+			function setDisplayNone(){
+				var bottomPocker = document.getElementsByClassName("mui-pull-bottom-pocket")[0];
+				var topPocker = document.getElementsByClassName("mui-pull-top-pocket")[0];
+			    console.log(bottomPocker);
+		        bottomPocker.style.display = 'none'; 
+		    	topPocker.style.display = 'none';
+			}
+			
+		   
+		 
 	</script>
 
 </html>

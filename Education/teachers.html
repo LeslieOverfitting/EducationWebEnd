@@ -3,6 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Education</title>
+		<meta http-equiv="Access-Control-Allow-Origin" content="*">
+		<meta http-equiv="content-security-policy">
 		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -89,74 +91,8 @@
 						<div class="mui-indicator"></div>
 					</div>
 				</div>
-				<div class="mui-card">
-					<div class="mui-card-header" style="font-size: 20px; align-content: center;">
-						<h3  align="center" style="font-size: 20px;"><b>任 涛</b></h3>
-					</div>
-					<div class="mui-card-content">
-						<div class="mui-card-content-inner">
-							<table border="0">
-								<tr>
-									<td width="40%">
-										<img src="images/rentao.jpg" data-preview-src="" data-preview-group="1" width="100%" height="200px"/>
-									</td>
-									<td width="50%">
-										<p style="margin-left: 15px;">
-											任涛，教授，博士生导师，系主任，辽宁省百千万人才，沈阳市优秀研究生导师。 
-											于2003年毕业于东北大学自动化专业，获工学学士学位；2005年毕业于东北大学控制理论与控制工程专业，获工学硕士学位.
-										</p>
-									</td>
-								</tr>
-							</table>
-						</div>
-					</div>
-				</div>
-				<div class="mui-card">
-					<div class="mui-card-header" style="font-size: 20px; align-content: center;">
-						<h3  align="center" style="font-size: 20px;"><b>郭贵冰</b></h3>
-					</div>
-					<div class="mui-card-content">
-						<div class="mui-card-content-inner">
-							<table border="0">
-								<tr>
-									<td width="40%">
-										<img src="images/guoguibing.jpg" data-preview-src="" data-preview-group="1" width="100%" height="180px"/>
-									</td>
-									<td width="50%">
-										<p style="margin-left: 15px;">
-											2015年11月，以引进人才的方式加入东北大学软件学院，任职副教授。
-											师从新加坡南洋理工大学(NTU)的Assoc. Prof. Jie Zhang和Prof. Daniel Thalmann，2015年7月获得博士学位；
-											2015年1~10月，在新加坡管理大学(SMU)朱飞达教授的实验室担任研究员。
-										</p>
-									</td>
-								</tr>
-							</table>
-						</div>
-					</div>
-				</div>
-				<div class="mui-card">
-					<div class="mui-card-header" style="font-size: 20px; align-content: center;">
-						<h3  align="center" style="font-size: 20px;"><b>宋 杰</b></h3>
-					</div>
-					<div class="mui-card-content">
-						<div class="mui-card-content-inner">
-							<table border="0">
-								<tr>
-									<td width="40%">
-										<img src="images/songjie.jpg" data-preview-src="" data-preview-group="1" width="100%" height="200px"/>
-									</td>
-									<td width="50%">
-										<p style="margin-left: 15px;">
-											主研方向：大数据存储与管理，高能效计算，机器学习应用；
-											Big data management, Energy Efficient computing, Machine learning  and its application；<br />
-											辅研方向：云计算框架及其应用；Cloud computing framework and its applications.
-										</p>
-									</td>
-								</tr>
-							</table>
-						</div>
-					</div>
-				</div>
+				
+			
 			</div>
 		</div>			
 	</body>
@@ -169,5 +105,51 @@
 		slider.slider({
 			interval: 3000
 		});
+		
+		$(function(){
+				mui.ajax("http://localhost:8083/education/selectAllTeachersByPageAndQid",{
+					type:"get",
+					async:true,
+					data:{qid:1},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						var fatherDiv = $('#tabbar');
+						
+						for(var i = 0; i < data.length;i++ ){
+							var content = '<div class="mui-card">';
+							content += '<div class="mui-card-header" style="font-size: 20px; align-content: center;">';
+							content += '<h3  align="center" style="font-size: 20px;"><b>' + data[i].tname + '</b></h3>';
+							content += '</div>';
+							content += '<div class="mui-card-content">';
+							content += '<div class="mui-card-content-inner">';
+							content += '<table border="0">';
+							content += '<tr>';
+							content += '<td width="40%">';
+							content += '<img src="images/' + data[i].tphoto + '" data-preview-src="" data-preview-group="1" width="100%" height="200px"/>';
+							content += '</td>';
+							content += '<td width="50%">'
+							content += '<p style="margin-left: 15px;">';
+							content += data[i].introduction;
+							content += '</p>';
+							content += '</td>';
+							content += '</tr>';
+							content += '</table>';
+							content += '</div>';
+							content += '</div>';
+							content += '</div>';
+							fatherDiv.append(content);
+						}	
+						
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    				}
+
+				});
+		 	
+		 })
 	</script>
 </html>

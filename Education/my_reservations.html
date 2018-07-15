@@ -67,15 +67,15 @@
 				<div class="mui-slider-group">
 					<div id="item1" class="mui-slider-item mui-control-content mui-active">
 						<div id="scroll1" class="mui-scroll-wrapper">
-							<div class="mui-scroll">			
+							<div class="mui-scroll" id ="item1_mui-scroll">			
 							</div>
 						</div>
 					</div>								
 					<div id="item2" class="mui-slider-item mui-control-content">
 						<div id="scroll2" class="mui-scroll-wrapper">
-							<div class="mui-scroll">
+							<div class="mui-scroll" id ="item2_mui-scroll">
 								<div class="mui-loading">
-									<div class="mui-spinner">
+									<div class="mui-spinner" id ="item2_mui-spinner">
 									</div>
 								</div>
 							</div>
@@ -83,9 +83,9 @@
 					</div>
 					<div id="item3" class="mui-slider-item mui-control-content">
 						<div id="scroll3" class="mui-scroll-wrapper">
-							<div class="mui-scroll">
+							<div class="mui-scroll" id ="item3_mui-scroll">
 								<div class="mui-loading">
-									<div class="mui-spinner">
+									<div class="mui-spinner" >
 									</div>
 								</div>
 							</div>
@@ -96,22 +96,6 @@
 		</div>
 		<script src="js/mui.min.js"></script>
 		<script>
-			mui.init({
-				swipeBack: false
-				
-			});
-			mui.ready(function() {
-
-     			var item1 = document.getElementById('item1');
-     			var html1="";
-				for(var i=0;i<5;i++){
-					html1+= getItemStr("2018-06-15","待处理","php","FYY","1940471397");
-					html1+= getItemStr("2018-06-15","已处理","php","FYY","1940471397");
-				}
-				item1.querySelector('.mui-scroll').innerHTML = html1;
-			});
-			
-		
 			function getItemStr(order_time,order_state,img_name,order_name,order_no)
 			{
 				var html_content = '';
@@ -129,7 +113,7 @@
 				html_content += '			<table width="100%">';
 				html_content += '				<tr>';
 				html_content += '					<td width="50%">';
-				html_content += '						<img class="mui-media-object mui-pull-left" src="images/'+img_name+'.jpg">';
+				html_content += '						<img class="mui-media-object mui-pull-left" src="images/'+img_name+'">';
 				html_content += '					</td>';
 				html_content += '					<td width="50%" align="right">';
 				html_content += '						<p align="center" style="color: #333;">'+order_name+'</p>';
@@ -142,6 +126,45 @@
 				html_content += '</div>';
 				return html_content;
 			}
+			function getAllOrderByStatus(uid,currentPage,status,divId){
+				//获取所有订单
+				mui.ajax("http://localhost:8083/education/selectAllFreeListenBookByPageAndStatusAndUid",{
+					type:"post",
+					async:true,
+					data:{qid:1,status:status,uid:uid,currentPage:currentPage},
+					dataType:"json",
+					withCredentials:true,
+					crossDomain: true,
+					success:function(data){
+						var fatherDiv = $(divId);
+						fatherDiv.empty();
+						for(var i = 0; i < data.length;i++ ){		
+							var content = getItemStr(data[i].booktime.substring(0,10),data[i].status,data[i].freeListen.imgurl,data[i].freeListen.title,data[i].id);
+							fatherDiv.append(content);
+						}	
+						
+					},
+					error:function(xhr,type,errorThrown){
+        							//异常处理；
+        							console.log(type);
+    				}
+
+				});
+				
+			};
+		</script>
+		
+		<script>
+			mui.init({
+				swipeBack: false
+				
+			});
+			mui.ready(function() {
+				getAllOrderByStatus(1,1,"",'#item1_mui-scroll');
+			});
+			
+			
+			
 			
 			(function($) {
 				$('.mui-scroll-wrapper').scroll({
@@ -156,22 +179,16 @@
 					if (e.detail.slideNumber === 1) {
 						if (item2.querySelector('.mui-loading')) {
 							setTimeout(function() {
-								var html2="";
-								for(var i=0;i<5;i++){
-									html2+= getItemStr("2018-06-15","待处理","php","FYY","1940471397");
-								}
-								 
-								item2.querySelector('.mui-scroll').innerHTML = html2;
+								
+								getAllOrderByStatus(1,1,"待处理",'#item2_mui-scroll');
+								
+								
 							}, 500);
 						}
 					} else if (e.detail.slideNumber === 2) {
 						if (item3.querySelector('.mui-loading')) {
 							setTimeout(function() {	
-								var html3="";
-								for(var i=0;i<5;i++){
-									html3+= getItemStr("2018-06-15","已处理","php","FYY","1940471397");
-								}
-								item3.querySelector('.mui-scroll').innerHTML = html3;
+								 getAllOrderByStatus(1,1,"已处理",'#item3_mui-scroll');
 							}, 500);
 						}
 					}

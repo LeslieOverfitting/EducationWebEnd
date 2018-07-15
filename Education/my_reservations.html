@@ -95,7 +95,12 @@
 			</div>
 		</div>
 		<script src="js/mui.min.js"></script>
+		<script src="js/mui.pullToRefresh.js"></script>
+	   <script src="js/mui.pullToRefresh.material.js"></script>
 		<script>
+			var orderStatus ="";
+			var rowId= -1;
+			var itemName ="#item1_mui-scroll";
 			function getItemStr(order_time,order_state,img_name,order_name,order_no)
 			{
 				var html_content = '';
@@ -126,21 +131,25 @@
 				html_content += '</div>';
 				return html_content;
 			}
-			function getAllOrderByStatus(uid,currentPage,status,divId){
+			function getAllOrderByStatus(uid,status,divId){
 				//获取所有订单
 				mui.ajax("http://localhost:8083/education/selectAllFreeListenBookByPageAndStatusAndUid",{
 					type:"post",
 					async:true,
-					data:{qid:1,status:status,uid:uid,currentPage:currentPage},
+					data:{qid:1,status:status,uid:uid,rowId:rowId},
 					dataType:"json",
 					withCredentials:true,
 					crossDomain: true,
 					success:function(data){
 						var fatherDiv = $(divId);
-						fatherDiv.empty();
+						  
 						for(var i = 0; i < data.length;i++ ){		
 							var content = getItemStr(data[i].booktime.substring(0,10),data[i].status,data[i].freeListen.imgurl,data[i].freeListen.title,data[i].id);
 							fatherDiv.append(content);
+						if(data.length!=0)
+							rowId = data[data.length-1].id;
+						else
+							rowId = -2;
 						}	
 						
 					},
@@ -160,7 +169,7 @@
 				
 			});
 			mui.ready(function() {
-				getAllOrderByStatus(1,1,"",'#item1_mui-scroll');
+				getAllOrderByStatus(1,orderStatus,itemName);
 			});
 			
 			
@@ -179,16 +188,24 @@
 					if (e.detail.slideNumber === 1) {
 						if (item2.querySelector('.mui-loading')) {
 							setTimeout(function() {
-								
-								getAllOrderByStatus(1,1,"待处理",'#item2_mui-scroll');
-								
+								rowId =-1;
+								orderStatus ="待处理";
+								itemName = '#item2_mui-scroll';
+								getAllOrderByStatus(1,"待处理",'#item2_mui-scroll');
+								jQuery('#item2 .mui-loading').hide();
 								
 							}, 500);
 						}
 					} else if (e.detail.slideNumber === 2) {
 						if (item3.querySelector('.mui-loading')) {
 							setTimeout(function() {	
-								 getAllOrderByStatus(1,1,"已处理",'#item3_mui-scroll');
+								 rowId =-1;
+								 orderStatus="已处理";
+								 itemName = '#item3_mui-scroll';
+								 getAllOrderByStatus(1,"已处理",'#item3_mui-scroll');
+							 
+							    jQuery('#item3 .mui-loading').hide();
+					 
 							}, 500);
 						}
 					}
@@ -201,6 +218,49 @@
 						sliderProgressBar.setAttribute('style', sliderProgressBar.getAttribute('style'));
 					}
 				});
+				
+				
+				
+				//阻尼系数
+				var deceleration = mui.os.ios?0.003:0.0009;
+				$('.mui-scroll-wrapper').scroll({
+					bounce: false,
+					indicators: true, //是否显示滚动条
+					deceleration:deceleration
+				});
+				$.ready(function() {
+					//循环初始化所有下拉刷新，上拉加载。
+					$.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
+						$(pullRefreshEl).pullToRefresh({
+							down: {
+								callback: function() {
+									var self = this;
+									setTimeout(function() {
+										self.endPullDownToRefresh();
+									}, 1000);
+								}
+							},
+							up: {
+								callback: function() {
+									var self = this;
+									setTimeout(function() {
+										console.log("bound=" + rowId);
+										getAllOrderByStatus(1, orderStatus, itemName);
+										self.endPullUpToRefresh();
+									}, 1000);
+								}
+							}
+						});
+					});
+				 
+				});
+			
+				
+				
+				
+				
+				
+				
 			})(mui);
 		</script>
 

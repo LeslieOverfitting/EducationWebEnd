@@ -102,7 +102,6 @@
 			<button id='showLessionPicker' class="mui-btn mui-btn-block" type='button'>地点-方向-类别</button>
 			<div id="pullrefresh" class="mui-row ">
 				<div id="segmentedControlContents" class="mui-col-xs-12" style="border-left: 1px solid #c8c7cc;">
-
 				</div>
 			</div>
 
@@ -267,6 +266,7 @@
 						 	lessonRequestUrl = "http://localhost:8083/education/selectAllFreeListenByBranchNameAndCategoryAndQid";
 						 }
 						 boundaryId = -1;
+						 console.log(boundaryId);
 						 getLessonByBranchNameCategoryAndPage(lessonRequestUrl,1,items[0].text,items[2].text,boundaryId);
  						
 					});
@@ -294,24 +294,29 @@
 									var fid = 0;
 									var idstr ="";
 									if(data[j].lid !=undefined)
-										idstr ="lesson_info.html?lid="+data[j].lid+'';
-									if(data[j].fid !=undefined)
-										idstr ="free_listen_info.html?fid="+data[j].fid+'';
-									html.push('<a href="'+idstr+' "> <li class="mui-table-view-cell">' +
+										idstr ="href='lesson_info.html?lid="+data[j].lid+"'";
+									if(data[j].id !=undefined)
+										idstr ="href='free_listen_info.html?fid="+data[j].id+"'";
+									html.push('<a '+ idstr+'> <li class="mui-table-view-cell">' +
 										'<img src="images/' + data[j].imgurl  + '" data-preview-src="" data-preview-group="1" height="10%" width="100%"/>' +
 										'</a></li>');
-								console.log(data[j].lid);
+								
 								}
-								console.log(data.length);
-								if(data[data.length-1].lid !=undefined)
-									boundaryId = data[data.length-1].lid;
-								else
-									boundaryId = data[data.length-1].fid;
+							
+								if(data.length>0){
+									if(data[data.length-1].lid !=undefined)
+										boundaryId = data[data.length-1].lid;
+									else
+										boundaryId = data[data.length-1].fid;
+								}else{
+									boundaryId =-2;
+								}
+								
 								html.push('</ul></div>');
 								if(rowId ==-1)
 									jQuery('#segmentedControlContents').empty();
 								jQuery('#segmentedControlContents').append(html.join(''));
-								
+								mui('body').on('tap','a',function(){document.location.href=this.href;});
 								
 							},
 							error:function(xhr,type,errorThrown){
@@ -345,11 +350,11 @@
 			function pullupRefresh() {
 				setTimeout(function() {
 					//mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > 2)); //参数为true代表没有更多数据了。
-					console.log('345');
+				
 					console.log(lessonRequestUrl);
 					console.log("bound="+boundaryId);
 					getLessonByBranchNameCategoryAndPage(lessonRequestUrl,1,branchName,category,boundaryId);
-					mui('#pullrefresh').pullRefresh().endPullupToRefresh(false);
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh(boundaryId==-2);
 				}, 1500);
 			}
 			

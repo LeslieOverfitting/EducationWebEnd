@@ -384,24 +384,27 @@
 					}
 					 
 				}
-				html.push('<a  class="mui-card-link"><span style="color:'+redOrNot +'" class="mui-icon mui-icon-extra mui-icon-extra-heart-filled"  value="'+data.mid +'">');
-				html.push('<span id="likersName'+data.mid +'">');
-				for(var j=0;j<data.likes.length;j++){
-					 
-					if(j+1<data.likes.length)
-						html.push(data.likes[j].user.nickname+' ');
-					else
-						html.push(data.likes[j].user.nickname);
-				}
-				html.push('</span>');
-				html.push('</span></a>');
-				html.push('<a  href="#comment"  class="mui-card-link"><span class="mui-icon mui-icon-compose" value="'+data.mid +'" ></span></a></div>');
+				html.push('<a class="mui-card-link"><span style="color:'+redOrNot +'" class="mui-icon mui-icon-extra mui-icon-extra-heart-filled" value="'+data.mid +'"></span></a>');
+				html.push('<a href="#comment" class="mui-card-link"><span class="mui-icon mui-icon-compose" value="'+data.mid +'" ></span></a></div>');
 				
 				if(data.replies.length>0){
-					html.push('<div id="reply'+data.mid+'" class="mui-card-footer">');
+					html.push('<div class="mui-card-footer" style="display: block;">');
+					html.push('<div  style="margin-bottom: 10px;">');
+					html.push('<span class="mui-icon mui-icon-extra mui-icon-extra-heart-filled" style="font-size: 15px;"></span> ');
+					html.push('<p style="display:inline" id="likersName'+data.mid +'" >');
+					for(var j=0;j<data.likes.length;j++){
+						if(j+1<data.likes.length)
+							html.push(data.likes[j].user.nickname+' ');
+						else
+							html.push(data.likes[j].user.nickname);
+					}
+					html.push('</p>');
+					html.push('</div>');
+					html.push('<div id="reply'+data.mid+'" style="margin-bottom: 5px;">');
 					for(var j=0;j<data.replies.length;j++){
 						html.push(data.replies[j].user.nickname +':'+data.replies[j].content+'<br>');
 					}
+					html.push('</div>');
 					html.push('</div>');
 				}
 				html.push('</div>');
@@ -418,9 +421,8 @@
 					withCredentials:true,
 					crossDomain: true,
 					success:function(data){
-						console.log(data.nickname);
-						//console.log($('#likersName'+mid+'').innerText);
 						
+					console.log("innerText"+document.getElementById('likersName'+mid+'').innerText);
 						 document.getElementById('likersName'+mid+'').innerText += ' '+data.nickname;
 						 
 					},
@@ -442,10 +444,8 @@
 					crossDomain: true,
 					success:function(data){
 						 var likerNames = document.getElementById('likersName'+mid+'').innerText;
-						  var temp = likerNames.split(nickName).join('');
-						 document.getElementById('likersName'+mid+'').innerText = temp;
-						
-						 
+						 var temp = likerNames.split(nickName).join('');
+						 document.getElementById('likersName'+mid+'').innerText = temp;				 
 					},
 					error:function(xhr,type,errorThrown){
         							//异常处理；
